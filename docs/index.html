@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador de Fórmulas — Grade Engine</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --ground: #f5f7f8;
+    --surface: #ffffff;
+    --surface-sunken: #eef1f2;
+    --border: #d7dee0;
+    --text: #16211f;
+    --text-muted: #5c6b69;
+    --accent: #1d6f6a;
+    --accent-strong: #145550;
+    --accent-tint: #e3f0ee;
+    --error: #b3453d;
+    --error-tint: #fbe9e7;
+    --shadow: 0 1px 2px rgba(22, 33, 31, 0.06), 0 8px 24px -12px rgba(22, 33, 31, 0.12);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101514;
+      --surface: #171e1c;
+      --surface-sunken: #1d2523;
+      --border: #2b3634;
+      --text: #e7efed;
+      --text-muted: #93a29e;
+      --accent: #4fb3ab;
+      --accent-strong: #6ecdc4;
+      --accent-tint: rgba(79, 179, 171, 0.14);
+      --error: #e07a72;
+      --error-tint: rgba(224, 122, 114, 0.14);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #101514;
+    --surface: #171e1c;
+    --surface-sunken: #1d2523;
+    --border: #2b3634;
+    --text: #e7efed;
+    --text-muted: #93a29e;
+    --accent: #4fb3ab;
+    --accent-strong: #6ecdc4;
+    --accent-tint: rgba(79, 179, 171, 0.14);
+    --error: #e07a72;
+    --error-tint: rgba(224, 122, 114, 0.14);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    background: var(--ground);
+  }
+
+  body {
+    margin: 0;
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 62ch;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 96px;
+    padding: 14px 16px;
+    background: var(--surface-sunken);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15.5px;
+    line-height: 1.6;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+
+  .result {
+    margin-top: 18px;
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14.5px;
+    line-height: 1.55;
+    border: 1px solid transparent;
+  }
+
+  .result.valid {
+    background: var(--accent-tint);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .result.invalid {
+    background: var(--error-tint);
+    border-color: color-mix(in srgb, var(--error) 35%, transparent);
+  }
+
+  .result.empty {
+    background: var(--surface-sunken);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+
+  .result-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+  }
+
+  .result.valid .result-icon { color: var(--accent-strong); }
+  .result.invalid .result-icon { color: var(--error); }
+
+  .result-body { flex: 1; min-width: 0; }
+
+  .result-label {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    margin-bottom: 4px;
+  }
+
+  .result.valid .result-label { color: var(--accent-strong); }
+  .result.invalid .result-label { color: var(--error); }
+
+  .result-detail {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13.5px;
+    color: var(--text);
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  .result.empty .result-detail { color: var(--text-muted); font-family: "Inter", sans-serif; }
+
+  .grammar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .grammar h2 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+  }
+
+  .examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+
+  .example {
+    text-align: left;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .example:hover {
+    border-color: var(--accent);
+    background: var(--accent-tint);
+  }
+
+  .example:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .ref {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 20px;
+    font-size: 13.5px;
+  }
+
+  .ref dt {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    color: var(--accent-strong);
+    white-space: nowrap;
+  }
+
+  .ref dd {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  a {
+    color: var(--accent-strong);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <span class="eyebrow">Grade Engine</span>
+    <h1>Validador de fórmulas de cálculo de notas</h1>
+    <p class="subtitle">
+      Digite uma fórmula para conferir se ela é sintaticamente válida antes de
+      cadastrá-la. A validação roda inteiramente no navegador, usando a mesma
+      gramática do motor de cálculo Java (lexer + parser).
+    </p>
+  </header>
+
+  <div class="panel">
+    <label for="formula">Fórmula</label>
+    <textarea id="formula" spellcheck="false" placeholder="ex: if(media(P1, P2) &gt;= 6, 10, 0)"></textarea>
+    <div id="result" class="result empty">
+      <svg class="result-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="10" cy="10" r="7.25" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <div class="result-body">
+        <div class="result-detail">Comece a digitar para validar.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel grammar">
+    <h2>Exemplos</h2>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <div class="panel grammar">
+    <h2>Referência da gramática</h2>
+    <dl class="ref">
+      <dt>Números</dt><dd>7, 7.5</dd>
+      <dt>Variáveis</dt><dd>qualquer identificador alfanumérico, ex: P1, nota_final</dd>
+      <dt>Aritmética</dt><dd>+ &nbsp; − &nbsp; × (*) &nbsp; ÷ (/)</dd>
+      <dt>Comparação</dt><dd>&gt; &nbsp; &lt; &nbsp; &gt;= &nbsp; &lt;= &nbsp; = (igual) &nbsp; ! (diferente)</dd>
+      <dt>media(...)</dt><dd>média aritmética, mínimo 1 argumento</dd>
+      <dt>min(...) / max(...)</dt><dd>mínimo 1 argumento</dd>
+      <dt>if(cond, a, b)</dt><dd>o primeiro argumento precisa ser uma comparação</dd>
+      <dt>Parênteses</dt><dd>agrupam sub-expressões, até 200 níveis de aninhamento</dd>
+    </dl>
+  </div>
+
+  <footer>Validação local, fiel à gramática de com.gradeengine.domain.Parser — nenhuma fórmula sai do navegador.</footer>
+</div>
+
+<script src="validador.js"></script>
+<script>
+  const textarea = document.getElementById("formula");
+  const resultEl = document.getElementById("result");
+  const examplesEl = document.getElementById("examples");
+
+  const ICON_VALID = `<svg class="result-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <circle cx="10" cy="10" r="8.25" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M6.5 10.2l2.2 2.2 4.8-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+
+  const ICON_INVALID = `<svg class="result-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <circle cx="10" cy="10" r="8.25" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+  </svg>`;
+
+  const ICON_EMPTY = `<svg class="result-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <circle cx="10" cy="10" r="7.25" stroke="currentColor" stroke-width="1.5"/>
+  </svg>`;
+
+  const EXEMPLOS = [
+    "media(P1, P2, P3)",
+    "if(media(P1, P2) >= 6, 10, 0)",
+    "(P1 + P2 + P3) / 3",
+    "max(P1, P2) - min(P1, P2)",
+    "if(P1 + P2, 1, 2)",
+    "media(P1,)",
+  ];
+
+  function render() {
+    const texto = textarea.value;
+
+    if (texto.trim() === "") {
+      resultEl.className = "result empty";
+      resultEl.innerHTML = ICON_EMPTY + '<div class="result-body"><div class="result-detail">Comece a digitar para validar.</div></div>';
+      return;
+    }
+
+    const r = validarFormula(texto);
+
+    if (r.valida) {
+      resultEl.className = "result valid";
+      resultEl.innerHTML = ICON_VALID +
+        '<div class="result-body"><div class="result-label">Fórmula válida</div>' +
+        '<div class="result-detail"></div></div>';
+      resultEl.querySelector(".result-detail").textContent = r.descricao;
+    } else {
+      resultEl.className = "result invalid";
+      resultEl.innerHTML = ICON_INVALID +
+        '<div class="result-body"><div class="result-label">Fórmula inválida</div>' +
+        '<div class="result-detail"></div></div>';
+      resultEl.querySelector(".result-detail").textContent = r.erro;
+    }
+  }
+
+  textarea.addEventListener("input", render);
+
+  EXEMPLOS.forEach((ex) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "example";
+    btn.textContent = ex;
+    btn.title = ex;
+    btn.addEventListener("click", () => {
+      textarea.value = ex;
+      textarea.focus();
+      render();
+    });
+    examplesEl.appendChild(btn);
+  });
+
+  render();
+</script>
+</body>
+</html>
