@@ -1,6 +1,6 @@
 package com.gradeengine.io;
 
-import com.gradeengine.domain.ContextoDeCalculo;
+import com.gradeengine.ContextoDeCalculo;
 
 /**
  * Uma linha de entrada (CSV ou JSON) já traduzida para o contexto de

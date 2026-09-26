@@ -1,6 +1,6 @@
 package com.gradeengine.io;
 
-import com.gradeengine.domain.ErroDoMotor;
+import com.gradeengine.ErroDoMotor;
 
 /**
  * Resultado do cálculo de nota de um aluno específico. Um erro aqui

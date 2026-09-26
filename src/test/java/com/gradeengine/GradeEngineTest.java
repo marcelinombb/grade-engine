@@ -1,21 +1,15 @@
 package com.gradeengine;
 
-import com.gradeengine.domain.Avaliacao;
-import com.gradeengine.domain.ContextoDeCalculo;
-import com.gradeengine.domain.ErroDeCalculo;
-import com.gradeengine.domain.ErroDeParse;
-import com.gradeengine.domain.ErroDoMotor;
-import com.gradeengine.domain.ErroLexico;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GradeEngineTest {
 
     private static ContextoDeCalculo contextoCom(String codigo, double nota) {
-        ContextoDeCalculo contexto = new ContextoDeCalculo();
-        contexto.adicionar(new Avaliacao(codigo, nota));
-        return contexto;
+        return new ContextoDeCalculo().adicionar(codigo, nota);
     }
 
     @Test
@@ -27,11 +21,18 @@ class GradeEngineTest {
     }
 
     @Test
+    void avaliaDiretoComMap() throws ErroDoMotor {
+        GradeEngine engine = new GradeEngine();
+        double resultado = engine.avaliar("media(P1, P2)", Map.of("P1", 8.0, "P2", 6.0));
+        assertEquals(7.0, resultado);
+    }
+
+    @Test
     void avaliaFuncaoMedia() throws ErroDoMotor {
         GradeEngine engine = new GradeEngine();
         ContextoDeCalculo contexto = new ContextoDeCalculo();
-        contexto.adicionar(new Avaliacao("P1", 6.0));
-        contexto.adicionar(new Avaliacao("P2", 10.0));
+        contexto.adicionar("P1", 6.0);
+        contexto.adicionar("P2", 10.0);
 
         assertEquals(8.0, engine.avaliar("media(P1, P2)", contexto));
     }
@@ -76,12 +77,12 @@ class GradeEngineTest {
         String formula = "media(P1, P2)";
 
         ContextoDeCalculo contextoAluno1 = new ContextoDeCalculo();
-        contextoAluno1.adicionar(new Avaliacao("P1", 5.0));
-        contextoAluno1.adicionar(new Avaliacao("P2", 7.0));
+        contextoAluno1.adicionar("P1", 5.0);
+        contextoAluno1.adicionar("P2", 7.0);
 
         ContextoDeCalculo contextoAluno2 = new ContextoDeCalculo();
-        contextoAluno2.adicionar(new Avaliacao("P1", 9.0));
-        contextoAluno2.adicionar(new Avaliacao("P2", 9.0));
+        contextoAluno2.adicionar("P1", 9.0);
+        contextoAluno2.adicionar("P2", 9.0);
 
         engine.avaliar(formula, contextoAluno1);
         assertEquals(1, engine.tamanhoCache());
@@ -149,8 +150,8 @@ class GradeEngineTest {
         String formula = "media(P1, P2)";
 
         ContextoDeCalculo contexto = new ContextoDeCalculo();
-        contexto.adicionar(new Avaliacao("P1", 5.0));
-        contexto.adicionar(new Avaliacao("P2", 7.0));
+        contexto.adicionar("P1", 5.0);
+        contexto.adicionar("P2", 7.0);
 
         engine.avaliar(formula, contexto);
         assertEquals(1, engine.tamanhoCache());

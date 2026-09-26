@@ -1,4 +1,4 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 public sealed class ErroDeParse extends Exception {
 
@@ -42,12 +42,6 @@ public sealed class ErroDeParse extends Exception {
         }
     }
 
-    /**
-     * Descompasso entre as variáveis declaradas via
-     * ExpressionBuilder.variable(...) e as efetivamente referenciadas na
-     * fórmula -- detectado em build(), não é um erro de gramática da
-     * fórmula em si (por isso vive aqui, e não em ErroLexico/ErroDeCalculo).
-     */
     public static final class VariavelNaoDeclarada extends ErroDeParse {
         public VariavelNaoDeclarada(String mensagem) {
             super(mensagem);

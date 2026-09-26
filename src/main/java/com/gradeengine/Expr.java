@@ -1,4 +1,4 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public sealed interface Expr {
+sealed interface Expr {
 
     record Numero(double valor) implements Expr {}
     record Variavel(String nome) implements Expr {}
@@ -29,12 +29,6 @@ public sealed interface Expr {
         return Optional.empty();
     }
 
-    /**
-     * Coleta, em ordem de primeira aparição, os nomes de todas as
-     * Expr.Variavel referenciadas na árvore -- usado para validar, antes
-     * de qualquer avaliação, se todas as variáveis que a fórmula precisa
-     * foram declaradas (ver ExpressionBuilder.build()).
-     */
     static Set<String> variaveisReferenciadas(Expr expr) {
         Set<String> nomes = new LinkedHashSet<>();
         coletarVariaveis(expr, nomes);

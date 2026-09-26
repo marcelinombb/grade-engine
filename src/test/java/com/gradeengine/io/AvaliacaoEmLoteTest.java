@@ -1,5 +1,6 @@
 package com.gradeengine.io;
 
+import com.gradeengine.ContextoDeCalculo;
 import com.gradeengine.GradeEngine;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +49,7 @@ class AvaliacaoEmLoteTest {
         // direto no ContextoDeCalculo do meio da lista).
         List<ContextoDeAluno> comFalha = List.of(
             alunos.get(0),
-            new ContextoDeAluno("Maria", new com.gradeengine.domain.ContextoDeCalculo()),
+            new ContextoDeAluno("Maria", new ContextoDeCalculo()),
             alunos.get(2)
         );
 

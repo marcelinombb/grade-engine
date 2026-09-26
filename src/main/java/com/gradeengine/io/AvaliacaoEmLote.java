@@ -1,7 +1,7 @@
 package com.gradeengine.io;
 
+import com.gradeengine.ErroDoMotor;
 import com.gradeengine.GradeEngine;
-import com.gradeengine.domain.ErroDoMotor;
 
 import java.util.ArrayList;
 import java.util.List;

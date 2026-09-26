@@ -1,7 +1,6 @@
 package com.gradeengine.io;
 
-import com.gradeengine.domain.Avaliacao;
-import com.gradeengine.domain.ContextoDeCalculo;
+import com.gradeengine.ContextoDeCalculo;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -66,7 +65,7 @@ public final class CsvContextoReader {
 
             String valorBruto = coluna.getValue();
             try {
-                contexto.adicionar(new Avaliacao(codigo, Double.parseDouble(valorBruto)));
+                contexto.adicionar(codigo, Double.parseDouble(valorBruto));
             } catch (NumberFormatException e) {
                 throw new ErroDeLeituraDeDados(
                     "Valor inválido para '" + codigo + "' na linha do aluno '" + aluno + "': '" + valorBruto + "'"

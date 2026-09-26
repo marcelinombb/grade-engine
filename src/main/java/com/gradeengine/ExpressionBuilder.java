@@ -1,9 +1,5 @@
 package com.gradeengine;
 
-import com.gradeengine.domain.ErroDeParse;
-import com.gradeengine.domain.ErroDoMotor;
-import com.gradeengine.domain.Expr;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 

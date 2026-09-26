@@ -1,8 +1,8 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 import java.util.List;
 
-public final class Avaliador {
+final class Avaliador {
 
     private Avaliador() {
     }

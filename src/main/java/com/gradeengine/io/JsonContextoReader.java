@@ -1,9 +1,8 @@
 package com.gradeengine.io;
 
-import com.gradeengine.domain.Avaliacao;
-import com.gradeengine.domain.ContextoDeCalculo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gradeengine.ContextoDeCalculo;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -76,7 +75,7 @@ public final class JsonContextoReader {
                 );
             }
 
-            contexto.adicionar(new Avaliacao(codigo, valor.asDouble()));
+            contexto.adicionar(codigo, valor.asDouble());
         }
 
         return new ContextoDeAluno(aluno, contexto);

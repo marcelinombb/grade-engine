@@ -1,7 +1,5 @@
 package com.gradeengine;
 
-import com.gradeengine.domain.ErroDeParse;
-import com.gradeengine.domain.ErroDoMotor;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

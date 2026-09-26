@@ -1,10 +1,12 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ParserTest {
 
@@ -12,11 +14,11 @@ class ParserTest {
     void funcaoMedia() throws ErroDeParse {
         // media(P1, 3.0)
         List<Token> tokens = List.of(
-            new Token.Ident("media"),
+            Token.identificador("media"),
             Token.LEFT_PAREN,
-            new Token.Ident("P1"),
+            Token.identificador("P1"),
             Token.COMMA,
-            new Token.Number(3.0),
+            Token.numero(3.0),
             Token.RIGHT_PAREN
         );
 
@@ -31,17 +33,17 @@ class ParserTest {
     void funcaoIf2() throws ErroDeParse {
         // if(P1 > P2 + P3, 10, 2)
         List<Token> tokens = List.of(
-            new Token.Ident("if"),
+            Token.identificador("if"),
             Token.LEFT_PAREN,
-            new Token.Ident("P1"),
+            Token.identificador("P1"),
             Token.GREATER,
-            new Token.Ident("P2"),
+            Token.identificador("P2"),
             Token.PLUS,
-            new Token.Ident("P3"),
+            Token.identificador("P3"),
             Token.COMMA,
-            new Token.Number(10.0),
+            Token.numero(10.0),
             Token.COMMA,
-            new Token.Number(2.0),
+            Token.numero(2.0),
             Token.RIGHT_PAREN
         );
 
@@ -59,13 +61,13 @@ class ParserTest {
     @Test
     void funcaoMax() throws ErroDeParse {
         List<Token> tokens = List.of(
-            new Token.Ident("max"),
+            Token.identificador("max"),
             Token.LEFT_PAREN,
-            new Token.Ident("P1"),
+            Token.identificador("P1"),
             Token.COMMA,
-            new Token.Ident("P2"),
+            Token.identificador("P2"),
             Token.COMMA,
-            new Token.Ident("P3"),
+            Token.identificador("P3"),
             Token.RIGHT_PAREN
         );
 
@@ -80,7 +82,7 @@ class ParserTest {
 
     @Test
     void funcaoMinSemArgumentosRetornaErro() {
-        List<Token> tokens = List.of(new Token.Ident("min"), Token.LEFT_PAREN, Token.RIGHT_PAREN);
+        List<Token> tokens = List.of(Token.identificador("min"), Token.LEFT_PAREN, Token.RIGHT_PAREN);
         Parser parser = new Parser(tokens);
 
         assertThrows(ErroDeParse.QuantidadeDeArgumentosInvalida.class, parser::parse);
@@ -88,7 +90,7 @@ class ParserTest {
 
     @Test
     void comparacaoMaior() throws ErroDeParse {
-        List<Token> tokens = List.of(new Token.Ident("P1"), Token.GREATER, new Token.Ident("P2"));
+        List<Token> tokens = List.of(Token.identificador("P1"), Token.GREATER, Token.identificador("P2"));
         Parser parser = new Parser(tokens);
 
         Expr esperado = new Expr.Maior(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
@@ -98,7 +100,7 @@ class ParserTest {
 
     @Test
     void comparacaoMenor() throws ErroDeParse {
-        List<Token> tokens = List.of(new Token.Ident("P1"), Token.LESS, new Token.Ident("P2"));
+        List<Token> tokens = List.of(Token.identificador("P1"), Token.LESS, Token.identificador("P2"));
         Parser parser = new Parser(tokens);
 
         Expr esperado = new Expr.Menor(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
@@ -108,7 +110,7 @@ class ParserTest {
 
     @Test
     void comparacaoMaiorIgual() throws ErroDeParse {
-        List<Token> tokens = List.of(new Token.Ident("P1"), Token.GREATER_EQ, new Token.Ident("P2"));
+        List<Token> tokens = List.of(Token.identificador("P1"), Token.GREATER_EQ, Token.identificador("P2"));
         Parser parser = new Parser(tokens);
 
         Expr esperado = new Expr.MaiorIgual(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
@@ -118,7 +120,7 @@ class ParserTest {
 
     @Test
     void comparacaoMenorIgual() throws ErroDeParse {
-        List<Token> tokens = List.of(new Token.Ident("P1"), Token.LESS_EQ, new Token.Ident("P2"));
+        List<Token> tokens = List.of(Token.identificador("P1"), Token.LESS_EQ, Token.identificador("P2"));
         Parser parser = new Parser(tokens);
 
         Expr esperado = new Expr.MenorIgual(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
@@ -128,7 +130,7 @@ class ParserTest {
 
     @Test
     void comparacaoIgual() throws ErroDeParse {
-        List<Token> tokens = List.of(new Token.Ident("P1"), Token.EQUAL, new Token.Ident("P2"));
+        List<Token> tokens = List.of(Token.identificador("P1"), Token.EQUAL, Token.identificador("P2"));
         Parser parser = new Parser(tokens);
 
         Expr esperado = new Expr.Igual(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
@@ -138,7 +140,7 @@ class ParserTest {
 
     @Test
     void comparacaoDiferente() throws ErroDeParse {
-        List<Token> tokens = List.of(new Token.Ident("P1"), Token.NOT_EQUAL, new Token.Ident("P2"));
+        List<Token> tokens = List.of(Token.identificador("P1"), Token.NOT_EQUAL, Token.identificador("P2"));
         Parser parser = new Parser(tokens);
 
         Expr esperado = new Expr.Diferente(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
@@ -149,7 +151,7 @@ class ParserTest {
     @Test
     void deveRetornarSoma() throws ErroDeParse {
         List<Token> tokens = List.of(
-            new Token.Ident("P1"), Token.PLUS, new Token.Number(3.0), Token.STAR, new Token.Number(5.0)
+            Token.identificador("P1"), Token.PLUS, Token.numero(3.0), Token.STAR, Token.numero(5.0)
         );
 
         Parser parser = new Parser(tokens);
@@ -173,7 +175,7 @@ class ParserTest {
     @Test
     void deveRetornarTokenInesperado2() {
         List<Token> tokens = List.of(
-            new Token.Ident("P1"), new Token.Number(3.0), Token.PLUS, Token.STAR, new Token.Number(5.0)
+            Token.identificador("P1"), Token.numero(3.0), Token.PLUS, Token.STAR, Token.numero(5.0)
         );
         Parser parser = new Parser(tokens);
 
@@ -185,12 +187,12 @@ class ParserTest {
         // (P1 + P2) * P3
         List<Token> tokens = List.of(
             Token.LEFT_PAREN,
-            new Token.Ident("P1"),
+            Token.identificador("P1"),
             Token.PLUS,
-            new Token.Ident("P2"),
+            Token.identificador("P2"),
             Token.RIGHT_PAREN,
             Token.STAR,
-            new Token.Ident("P3")
+            Token.identificador("P3")
         );
 
         Parser parser = new Parser(tokens);
@@ -209,9 +211,9 @@ class ParserTest {
         List<Token> tokens = List.of(
             Token.LEFT_PAREN,
             Token.LEFT_PAREN,
-            new Token.Ident("P1"),
+            Token.identificador("P1"),
             Token.PLUS,
-            new Token.Ident("P2"),
+            Token.identificador("P2"),
             Token.RIGHT_PAREN,
             Token.RIGHT_PAREN
         );
@@ -225,15 +227,13 @@ class ParserTest {
 
     @Test
     void deveRetornarErroDeProfundidadeExcedidaParaParentesesDemaisAninhados() {
-        // ((((...(P1)...)))) com mais níveis do que o parser aceita --
-        // sem o limite, isso estouraria a pilha (StackOverflowError) em vez
-        // de falhar com um erro tratável.
+        // ((((...(P1)...)))) com mais níveis do que o parser aceita
         int niveis = 10_000;
-        List<Token> tokens = new java.util.ArrayList<>();
+        List<Token> tokens = new ArrayList<>();
         for (int i = 0; i < niveis; i++) {
             tokens.add(Token.LEFT_PAREN);
         }
-        tokens.add(new Token.Ident("P1"));
+        tokens.add(Token.identificador("P1"));
         for (int i = 0; i < niveis; i++) {
             tokens.add(Token.RIGHT_PAREN);
         }

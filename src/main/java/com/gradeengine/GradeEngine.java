@@ -1,7 +1,5 @@
 package com.gradeengine;
 
-import com.gradeengine.domain.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,8 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Fachada pública do motor: recebe o texto de uma fórmula, faz o parse uma
  * única vez (guardando a AST em cache por texto de fórmula) e avalia contra
- * um ContextoDeCalculo. Pensada para o caso de uso real -- a mesma fórmula
- * é reavaliada para muitos alunos -- então parse repetido é custo evitável.
+ * um ContextoDeCalculo ou Map<String, Double>.
  */
 public final class GradeEngine {
 
@@ -24,6 +21,10 @@ public final class GradeEngine {
         } catch (ErroDeCalculo erro) {
             throw ErroDoMotor.calculo(erro);
         }
+    }
+
+    public double avaliar(String formula, Map<String, Double> notas) throws ErroDoMotor {
+        return avaliar(formula, ContextoDeCalculo.de(notas));
     }
 
     /**

@@ -1,9 +1,5 @@
 package com.gradeengine;
 
-import com.gradeengine.domain.Avaliacao;
-import com.gradeengine.domain.ContextoDeCalculo;
-import com.gradeengine.domain.ErroDoMotor;
-
 /**
  * Uma fórmula já parseada e validada, pronta para receber valores de
  * variável e ser avaliada -- estilo exp4j (ExpressionBuilder().build()).
@@ -27,7 +23,7 @@ public final class Expression {
     }
 
     public Expression setVariable(String nome, double valor) {
-        contexto.adicionar(new Avaliacao(nome, valor));
+        contexto.adicionar(nome, valor);
         return this;
     }
 

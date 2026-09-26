@@ -1,4 +1,4 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 public sealed class ErroLexico extends Exception {
 

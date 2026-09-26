@@ -1,19 +1,20 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AvaliadorTest {
 
-    private static ContextoDeCalculo contextoCom(Object[]... pares) {
-        ContextoDeCalculo contexto = new ContextoDeCalculo();
-        for (Object[] par : pares) {
-            contexto.adicionar(new Avaliacao((String) par[0], (Double) par[1]));
-        }
-        return contexto;
+    private static ContextoDeCalculo contextoCom(String codigo, double nota) {
+        return new ContextoDeCalculo().adicionar(codigo, nota);
+    }
+
+    private static ContextoDeCalculo contextoCom(String c1, double n1, String c2, double n2) {
+        return new ContextoDeCalculo().adicionar(c1, n1).adicionar(c2, n2);
     }
 
     @Test
@@ -24,7 +25,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaVariavelExistente() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 8.5});
+        ContextoDeCalculo contexto = contextoCom("P1", 8.5);
         assertEquals(8.5, Avaliador.avaliar(new Expr.Variavel("P1"), contexto));
     }
 
@@ -38,7 +39,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaSoma() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 3.0}, new Object[]{"P2", 4.0});
+        ContextoDeCalculo contexto = contextoCom("P1", 3.0, "P2", 4.0);
         Expr expr = new Expr.Soma(new Expr.Variavel("P1"), new Expr.Variavel("P2"));
 
         assertEquals(7.0, Avaliador.avaliar(expr, contexto));
@@ -78,7 +79,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaMedia() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 6.0}, new Object[]{"P2", 10.0});
+        ContextoDeCalculo contexto = contextoCom("P1", 6.0, "P2", 10.0);
         Expr expr = new Expr.Funcao("media", List.of(new Expr.Variavel("P1"), new Expr.Variavel("P2")));
 
         assertEquals(8.0, Avaliador.avaliar(expr, contexto));
@@ -86,7 +87,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaMinComDoisArgumentos() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 6.0}, new Object[]{"P2", 10.0});
+        ContextoDeCalculo contexto = contextoCom("P1", 6.0, "P2", 10.0);
         Expr expr = new Expr.Funcao("min", List.of(new Expr.Variavel("P1"), new Expr.Variavel("P2")));
 
         assertEquals(6.0, Avaliador.avaliar(expr, contexto));
@@ -94,7 +95,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaMaxComDoisArgumentos() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 6.0}, new Object[]{"P2", 10.0});
+        ContextoDeCalculo contexto = contextoCom("P1", 6.0, "P2", 10.0);
         Expr expr = new Expr.Funcao("max", List.of(new Expr.Variavel("P1"), new Expr.Variavel("P2")));
 
         assertEquals(10.0, Avaliador.avaliar(expr, contexto));
@@ -130,7 +131,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaIfCondicaoVerdadeira() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 8.0});
+        ContextoDeCalculo contexto = contextoCom("P1", 8.0);
         Expr expr = new Expr.Funcao("if", List.of(
             new Expr.Maior(new Expr.Variavel("P1"), new Expr.Numero(6.0)),
             new Expr.Numero(10.0),
@@ -142,7 +143,7 @@ class AvaliadorTest {
 
     @Test
     void avaliaIfCondicaoFalsa() throws ErroDeCalculo {
-        ContextoDeCalculo contexto = contextoCom(new Object[]{"P1", 4.0});
+        ContextoDeCalculo contexto = contextoCom("P1", 4.0);
         Expr expr = new Expr.Funcao("if", List.of(
             new Expr.Maior(new Expr.Variavel("P1"), new Expr.Numero(6.0)),
             new Expr.Numero(10.0),

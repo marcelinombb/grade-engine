@@ -1,38 +1,17 @@
-package com.gradeengine.domain;
+package com.gradeengine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-/**
- * Parser recursivo descendente (recursive descent) para a gramática de
- * fórmulas de cálculo de notas.
- *
- * A gramática é organizada em camadas, da mais "solta" para a mais
- * "apertada", cada uma delegando para a próxima antes de tentar resolver
- * seu próprio nível de precedência:
- *
- * comparacao := expressao (('>' | '<' | '>=' | '<=' | '==' | '!=') expressao)?
- * expressao  := termo (('+' | '-') termo)*
- * termo      := fator (('*' | '/') fator)*
- * fator      := NUMBER | IDENT | IDENT '(' (comparacao (',' comparacao)*)? ')' | '(' comparacao ')'
- */
-public final class Parser {
+final class Parser {
 
-    /**
-     * Limite de níveis de aninhamento (parênteses ou argumentos de função)
-     * que o parser desce antes de recusar a fórmula. Sem isso, uma fórmula
-     * com milhares de parênteses aninhados (entrada de usuário não
-     * confiável) estouraria a pilha de chamadas Java (StackOverflowError)
-     * em vez de falhar com um erro tratável.
-     */
     private static final int PROFUNDIDADE_MAXIMA = 200;
 
     private final List<Token> tokens;
     private int cursor = 0;
     private int profundidadeAtual = 0;
 
-    public Parser(List<Token> tokens) {
+    Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
@@ -57,19 +36,22 @@ public final class Parser {
     }
 
     private Expr fatorSemLimite() throws ErroDeParse {
-        Optional<Token> atual = peek();
-
-        if (atual.isPresent() && atual.get() instanceof Token.Number numero) {
-            advance();
-            return new Expr.Numero(numero.value());
+        Token atual = peek();
+        if (atual == null) {
+            throw new ErroDeParse.ExpressaoInvalida();
         }
 
-        if (atual.isPresent() && atual.get() instanceof Token.Ident ident) {
+        if (atual.is(TipoToken.NUMERO)) {
             advance();
-            String nome = ident.name();
-            Optional<Token> proximo = peek();
+            return new Expr.Numero(atual.valorNumero());
+        }
 
-            if (proximo.isPresent() && proximo.get() instanceof Token.LeftParen) {
+        if (atual.is(TipoToken.IDENTIFICADOR)) {
+            advance();
+            String nome = atual.texto();
+            Token proximo = peek();
+
+            if (proximo != null && proximo.is(TipoToken.PARENTESE_ESQ)) {
                 return switch (nome) {
                     case "if" -> parseIf(nome);
                     case "media" -> parseMedia(nome);
@@ -81,11 +63,11 @@ public final class Parser {
             return new Expr.Variavel(nome);
         }
 
-        if (atual.isPresent() && atual.get() instanceof Token.LeftParen) {
+        if (atual.is(TipoToken.PARENTESE_ESQ)) {
             advance();
             Expr expr = comparacao();
-            Optional<Token> fechamento = peek();
-            if (fechamento.isPresent() && fechamento.get() instanceof Token.RightParen) {
+            Token fechamento = peek();
+            if (fechamento != null && fechamento.is(TipoToken.PARENTESE_DIR)) {
                 advance();
                 return expr;
             }
@@ -99,15 +81,15 @@ public final class Parser {
         Expr esquerda = termo();
 
         while (true) {
-            Optional<Token> atual = peek();
-            if (atual.isPresent() && atual.get() instanceof Token.Plus) {
+            Token atual = peek();
+            if (atual == null) break;
+
+            if (atual.is(TipoToken.MAIS)) {
                 advance();
-                Expr direita = termo();
-                esquerda = new Expr.Soma(esquerda, direita);
-            } else if (atual.isPresent() && atual.get() instanceof Token.Minus) {
+                esquerda = new Expr.Soma(esquerda, termo());
+            } else if (atual.is(TipoToken.MENOS)) {
                 advance();
-                Expr direita = termo();
-                esquerda = new Expr.Subtracao(esquerda, direita);
+                esquerda = new Expr.Subtracao(esquerda, termo());
             } else {
                 break;
             }
@@ -118,34 +100,34 @@ public final class Parser {
 
     private Expr comparacao() throws ErroDeParse {
         Expr esquerda = expressao();
-        Optional<Token> atual = peek();
+        Token atual = peek();
 
-        if (atual.isEmpty()) {
+        if (atual == null) {
             return esquerda;
         }
 
-        return switch (atual.get()) {
-            case Token.Greater g -> {
+        return switch (atual.tipo()) {
+            case MAIOR -> {
                 advance();
                 yield new Expr.Maior(esquerda, expressao());
             }
-            case Token.Less l -> {
+            case MENOR -> {
                 advance();
                 yield new Expr.Menor(esquerda, expressao());
             }
-            case Token.GreaterEq g -> {
+            case MAIOR_IGUAL -> {
                 advance();
                 yield new Expr.MaiorIgual(esquerda, expressao());
             }
-            case Token.LessEq l -> {
+            case MENOR_IGUAL -> {
                 advance();
                 yield new Expr.MenorIgual(esquerda, expressao());
             }
-            case Token.Equal e -> {
+            case IGUAL -> {
                 advance();
                 yield new Expr.Igual(esquerda, expressao());
             }
-            case Token.NotEqual n -> {
+            case DIFERENTE -> {
                 advance();
                 yield new Expr.Diferente(esquerda, expressao());
             }
@@ -157,15 +139,15 @@ public final class Parser {
         Expr esquerda = fator();
 
         while (true) {
-            Optional<Token> atual = peek();
-            if (atual.isPresent() && atual.get() instanceof Token.Star) {
+            Token atual = peek();
+            if (atual == null) break;
+
+            if (atual.is(TipoToken.ASTERISCO)) {
                 advance();
-                Expr direita = fator();
-                esquerda = new Expr.Multiplicacao(esquerda, direita);
-            } else if (atual.isPresent() && atual.get() instanceof Token.Slash) {
+                esquerda = new Expr.Multiplicacao(esquerda, fator());
+            } else if (atual.is(TipoToken.BARRA)) {
                 advance();
-                Expr direita = fator();
-                esquerda = new Expr.Divisao(esquerda, direita);
+                esquerda = new Expr.Divisao(esquerda, fator());
             } else {
                 break;
             }
@@ -180,11 +162,10 @@ public final class Parser {
 
     private Expr.Funcao consumeFunction(String nome) throws ErroDeParse {
         List<Expr> params = new ArrayList<>();
+        advance(); // consome o '('
 
-        advance(); // consome o '(' -- fator() só espiou, não consumiu
-
-        Optional<Token> atual = peek();
-        if (atual.isPresent() && atual.get() instanceof Token.RightParen) {
+        Token atual = peek();
+        if (atual != null && atual.is(TipoToken.PARENTESE_DIR)) {
             advance();
             return new Expr.Funcao(nome, params);
         }
@@ -192,12 +173,12 @@ public final class Parser {
         while (true) {
             params.add(comparacao());
 
-            Optional<Token> separador = peek();
-            if (separador.isPresent() && separador.get() instanceof Token.Comma) {
+            Token separador = peek();
+            if (separador != null && separador.is(TipoToken.VIRGULA)) {
                 advance();
                 continue;
             }
-            if (separador.isPresent() && separador.get() instanceof Token.RightParen) {
+            if (separador != null && separador.is(TipoToken.PARENTESE_DIR)) {
                 advance();
                 break;
             }
@@ -207,13 +188,6 @@ public final class Parser {
         return new Expr.Funcao(nome, params);
     }
 
-    /**
-     * Consome uma chamada de função e valida que ela tem pelo menos
-     * `minimo` argumentos. Devolve a Expr.Funcao original e seus
-     * argumentos já desembrulhados, concentrando a única checagem
-     * de tipo (instanceof Expr.Funcao) aqui -- os chamadores
-     * (parseIf/parseMedia/parseMinMax) não precisam repetir isso.
-     */
     private record ChamadaValidada(Expr.Funcao chamada, List<Expr> args) {}
 
     private ChamadaValidada parseChamadaComAridadeMinima(String nome, int minimo) throws ErroDeParse {
@@ -248,16 +222,17 @@ public final class Parser {
         return parseChamadaComAridadeMinima(nome, 1).chamada();
     }
 
-    private Optional<Token> peek() {
+    Token peek() {
         if (cursor >= tokens.size()) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(tokens.get(cursor));
+        return tokens.get(cursor);
     }
 
-    private Optional<Token> advance() {
-        Optional<Token> token = peek();
-        cursor += 1;
-        return token;
+    Token advance() {
+        if (cursor >= tokens.size()) {
+            return null;
+        }
+        return tokens.get(cursor++);
     }
 }
